@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!--
+  Mobile test build — throwaway deployment
+  Portrait camera + touch fixes for the two phage life-cycle animations.
+  Desktop behaviour is unchanged; this page exists to verify the phone
+  experience on a real device before merging back into the main repo.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phage animations — mobile test build</title>
+<style>
+:root{--ink:#eaf6f2;--dim:#9db8b1;--faint:#557a72;--mint:#5fe8c6;--viol:#b49bff;--line:rgba(140,220,200,.16)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100%;background:#04101a;color:var(--ink);font-family:"Instrument Sans",system-ui,-apple-system,sans-serif;
+ background-image:linear-gradient(180deg,#082430 0%,#051a25 45%,#030d15 100%)}
+.wrap{max-width:680px;margin:0 auto;padding:48px 24px 64px}
+.tag{display:block;font:500 10px ui-monospace,monospace;letter-spacing:.24em;color:var(--dim);margin-bottom:8px}
+h1{font-weight:800;font-size:clamp(24px,5vw,36px);letter-spacing:-.02em;line-height:1.05}
+h1 em{font-style:normal;color:var(--mint)}
+p.lede{margin:18px 0 30px;font-size:15px;line-height:1.6;color:#bcd6cf;max-width:58ch}
+a.card{display:block;text-decoration:none;color:inherit;background:rgba(6,19,25,.72);border:1px solid var(--line);
+ border-radius:14px;padding:20px 22px;margin-bottom:16px;transition:border-color .18s}
+a.card:active{border-color:rgba(95,232,198,.5)}
+a.card.v:active{border-color:rgba(180,155,255,.55)}
+.kick{display:block;font:500 10px ui-monospace,monospace;letter-spacing:.2em;color:var(--mint);margin-bottom:6px}
+a.card.v .kick{color:var(--viol)}
+h2{font-weight:800;font-size:20px;letter-spacing:-.01em;margin-bottom:6px}
+a.card p{font-size:13px;line-height:1.55;color:#c2d8d2}
+.checks{margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+.checks h3{font:500 10px ui-monospace,monospace;letter-spacing:.22em;color:var(--dim);margin-bottom:14px}
+ul{list-style:none}
+li{font-size:13.5px;line-height:1.5;color:#c2d8d2;padding:7px 0 7px 26px;position:relative;border-bottom:1px solid rgba(140,220,200,.08)}
+li::before{content:"";position:absolute;left:4px;top:13px;width:9px;height:9px;border:1.5px solid var(--mint);border-radius:50%}
+footer{margin-top:36px;font:500 10px ui-monospace,monospace;letter-spacing:.14em;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">MOBILE TEST BUILD · THROWAWAY DEPLOYMENT</span>
+  <h1>Phage life cycles — <em>phone test</em></h1>
+  <p class="lede">These two builds add a portrait camera (the scene fills the screen and follows each
+  phase's action) plus touch fixes. Desktop behaviour is unchanged. Open each film, let it play,
+  and work through the checklist below.</p>
+
+  <a class="card" href="phage%20lytic%20cycle.html">
+    <span class="kick">01 · A T4-LIKE PHAGE × E. COLI</span>
+    <h2>The Lytic Cycle — open on phone</h2>
+    <p>6 phases, 1:42. Camera sits on the hero cell through lysis, then pans to the fresh hosts during propagation.</p>
+  </a>
+  <a class="card v" href="phage%20lysogenic%20cycle.html">
+    <span class="kick">02 · PHAGE λ × E. COLI K-12</span>
+    <h2>The Lysogenic Cycle — open on phone</h2>
+    <p>8 phases, 2:34. Existing camera rebased for portrait; decision fork re-centred; UV lamp and badge stay full-screen.</p>
+  </a>
+
+  <div class="checks">
+    <h3>TEST CHECKLIST — DO THESE ON THE PHONE</h3>
+    <ul>
+      <li>Open a film in portrait: does the scene fill the screen (no tiny letterboxed strip)?</li>
+      <li>Let it play ~60 s: does the camera drift smoothly between phases, or jump/cut?</li>
+      <li>Are the labels and captions readable? Does the caption clear the transport deck (not hide behind it)?</li>
+      <li>Tap the canvas to pause / resume. Tap the big play button.</li>
+      <li>Drag the scrubber left and right — does it track your finger without page zoom/scroll kicking in?</li>
+      <li>Tap each numbered phase dot along the top — all of them reachable (λ has 8)?</li>
+      <li>Rotate to landscape mid-playback, then back to portrait — does everything reposition correctly?</li>
+      <li>Try 0.5× / 1× / 2× speed and the loop toggle.</li>
+      <li>Turn sound on/off (speaker icon) — does it work without a visible error?</li>
+      <li>Run one full film: any lag, stuttering, or noticeable battery/heat?</li>
+      <li>If you can: repeat in both iOS Safari and Android Chrome.</li>
+    </ul>
+  </div>
+
+  <footer>TEST DEPLOYMENT · DELETE AFTER MERGE · SOURCE: seannair/Bacteriophage-life-cycle-animation</footer>
+</div>
+</body>
+</html>
