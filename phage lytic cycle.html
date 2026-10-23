@@ -132,6 +132,7 @@ h1 em{font-style:normal;color:var(--mint)}
   .top{flex-direction:column;align-items:flex-start;gap:10px}
   .steps{flex-wrap:wrap;row-gap:8px}
   .cap{bottom:152px}
+  .end{padding-bottom:22vh}
 }
 @media (pointer:coarse){
   .scrub{height:38px}
@@ -166,7 +167,7 @@ h1 em{font-style:normal;color:var(--mint)}
   <div class="note">≈50 per lysis · 8 drawn per wave-2 burst</div>
   <div class="hint">SPACE play &nbsp;·&nbsp; ← → seek<br>1 2 3 speed &nbsp;·&nbsp; L loop &nbsp;·&nbsp; click canvas</div>
 </aside>
-<section class="cap">
+<section class="cap" id="cap">
   <span class="capn" id="capn">01</span>
   <div class="capb" id="capb">
     <h2 id="capT">Adsorption</h2>
@@ -846,12 +847,21 @@ var ANN = [
 function drawAnno(t) {
   ctx.save();
   ctx.font = '500 12px "IBM Plex Mono", monospace';
+  var port = ch > cw && CAM_S > 0;
   for (var i = 0; i < ANN.length; i++) {
     var A = ANN[i];
     var al = seg(t, A.a, A.a + .5) * (1 - seg(t, A.b - .5, A.b));
     if (al <= 0) continue;
     var r = A.fn(t);
     var lx = r.pt.x + r.o.x, ly = r.pt.y + r.o.y;
+    if (port) { /* keep labels inside the crop: clamp to a safe screen area */
+      var tw = ctx.measureText(r.txt).width;
+      var sx = (lx - CAM_X) * CAM_S + cw / 2, sy = (ly - CAM_Y) * CAM_S + ch / 2;
+      sx = r.o.side ? clamp(sx, 16 + tw, cw - 10) : clamp(sx, 10, cw - 16 - tw);
+      sy = clamp(sy, ch * .18 + 8, ch * .68 - 8);
+      lx = CAM_X + (sx - cw / 2) / CAM_S;
+      ly = CAM_Y + (sy - ch / 2) / CAM_S;
+    }
     ctx.globalAlpha = al;
     ctx.strokeStyle = 'rgba(160,240,220,.55)';
     ctx.lineWidth = 1;
@@ -869,7 +879,7 @@ function drawAnno(t) {
   ctx.restore();
 }
 /* ================= environment ================= */
-var cw = 0, ch = 0, dpr = 1, CAM_S = 0;
+var cw = 0, ch = 0, dpr = 1, CAM_S = 0, CAM_X = 0, CAM_Y = 0;
 function resize() {
   dpr = Math.min(2, window.devicePixelRatio || 1);
   cw = window.innerWidth; ch = window.innerHeight;
@@ -947,22 +957,26 @@ function drawFrame() {
    strip, so instead we fill the screen height and let the camera drift
    between per-phase focal points. Landscape/desktop keep the original fit. */
 var CAMK = [
-  { t: 0,   x: 430, y: 250, z: 1.05 },
-  { t: 7,   x: 780, y: 430, z: 1.35 },
-  { t: 17,  x: 832, y: 520, z: 1.65 },
-  { t: 34,  x: 832, y: 505, z: 1.45 },
-  { t: 48,  x: 832, y: 520, z: 1.20 },
-  { t: 57,  x: 300, y: 440, z: 1.15 },
-  { t: 66,  x: 1328,y: 230, z: 1.25 }
+  { t: 0,    x: 560, y: 330, z: 1.20 },  /* approach: phage enters from top-left */
+  { t: 5,    x: 790, y: 480, z: 1.40 },  /* docking — the binding event in frame */
+  { t: 10,   x: 832, y: 505, z: 1.55 },  /* penetration close-up */
+  { t: 17,   x: 832, y: 520, z: 1.65 },  /* biosynthesis inside the cell */
+  { t: 34,   x: 832, y: 510, z: 1.50 },  /* assembly */
+  { t: 47,   x: 832, y: 520, z: 1.25 },  /* lysis burst */
+  { t: 54.5, x: 430, y: 360, z: 1.15 },  /* propagation: pan up-left toward new hosts */
+  { t: 60,   x: 300, y: 440, z: 1.15 },  /* settle on the left pair */
+  { t: 68,   x: 1328,y: 230, z: 1.25 }   /* right cell lysis */
 ];
 function camAt(t) {
   if (!(ch > cw)) return null;
   var i = 0;
-  for (var k = 1; k < CAMK.length; k++) if (t >= CAMK[k].t) i = k;
+  /* start gliding toward a keyframe 2.5 s before its time */
+  for (var k = 1; k < CAMK.length; k++) if (t >= CAMK[k].t - 2.5) i = k;
   var a = CAMK[i];
   if (i === 0) return a;
   var b = CAMK[i - 1];
-  var p = eIO(seg(t, b.t, a.t));
+  /* hold each focal point, then glide into it over a short window */
+  var p = eIO(seg(t, a.t - 2.5, a.t + 2));
   return { x: lerp(b.x, a.x, p), y: lerp(b.y, a.y, p), z: lerp(b.z, a.z, p) };
 }
 /* ================= master render (pure fn of t) ================= */
@@ -983,12 +997,13 @@ function render(t) {
     var vx = cw / s, vy = ch / s;
     var cx2 = vx >= W ? W / 2 : clamp(cam.x, vx / 2, W - vx / 2);
     var cy2 = vy >= H ? H / 2 : clamp(cam.y, vy / 2, H - vy / 2);
+    CAM_X = cx2; CAM_Y = cy2;
     ctx.save();
     ctx.translate(cw / 2, ch / 2);
     ctx.scale(s, s);
     ctx.translate(-cx2, -cy2);
   } else {
-    s = Math.min(cw / W, ch / H); CAM_S = s;
+    s = Math.min(cw / W, ch / H); CAM_S = s; CAM_X = W / 2; CAM_Y = H / 2;
     ctx.save();
     ctx.translate((cw - W * s) / 2, (ch - H * s) / 2);
     ctx.scale(s, s);
@@ -1108,6 +1123,7 @@ var tipEl = document.getElementById('tip');
 var trackEl = document.getElementById('track');
 var tcodeEl = document.getElementById('tcode');
 var playBtn = document.getElementById('play');
+var capEl = document.getElementById('cap');
 var capb = document.getElementById('capb');
 var capn = document.getElementById('capn');
 var capT = document.getElementById('capT');
@@ -1178,8 +1194,10 @@ function ui(t2) {
   setVal(vP, t2 < 49.5 ? 0 : (t2 < 66.5 ? 50 : (t2 < 67.7 ? 100 : (t2 < 68.9 ? 150 : 200))));
   setVal(vL, t2 < 49.5 ? 0 : (t2 < 66.5 ? 1 : (t2 < 67.7 ? 2 : (t2 < 68.9 ? 3 : 4))));
   setVal(vG, t2 < 55 ? 'I' : (t2 < 66.5 ? 'II' : 'III'));
-  /* end card: up from ~69.6, held through the 30 s tail, off just before the loop */
-  endEl.style.opacity = seg(t2, 68.5, 69.6) * (1 - seg(t2, T - 1, T - .2));
+  /* end card (test build): up from ~1:20, held through the tail, off just before
+     the loop; the phase-6 caption hands over to it at the same moment */
+  endEl.style.opacity = seg(t2, 79.5, 80.6) * (1 - seg(t2, T - 1, T - .2));
+  capEl.style.opacity = 1 - seg(t2, 79.3, 80.3);
   if (playing !== curPlay) { curPlay = playing; playBtn.classList.toggle('on', playing); }
 }
 playBtn.onclick = togglePlay;
