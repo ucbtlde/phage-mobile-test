@@ -136,6 +136,17 @@ h1 em{font-style:normal;color:var(--viol)}
   .top{flex-direction:column;align-items:flex-start;gap:10px}
   .steps{flex-wrap:wrap;row-gap:8px}
   .cap{bottom:152px}
+  .capn{font-size:30px}
+  .capb h2{font-size:19px;margin-bottom:5px}
+  .capb p{font-size:12px;line-height:1.4;max-width:none}
+  .end{padding-bottom:20vh}
+}
+/* ---------- landscape phone layout (mobile test build) ---------- */
+@media (max-height:500px) and (orientation:landscape){
+  .cap{left:16px;right:16px;bottom:92px;max-width:none;padding-right:14px}
+  .capn{font-size:30px}
+  .capb h2{font-size:18px;margin-bottom:4px}
+  .capb p{font-size:12px;line-height:1.4;max-width:none}
 }
 @media (pointer:coarse){
   .scrub{height:38px}
@@ -1145,6 +1156,7 @@ function render(t) {
   ctx.lineJoin = 'round';
   drawBG(t);
   var cm = cam(t), port = ch > cw;
+  var LIFT = (port || (cw > ch && ch <= 500)) ? ch * .05 : 0; /* phones: raise the action above the caption zone */
   if (port && t < 12) { /* keep the incoming phage in frame during adsorption */
     var hs = heroState(t), pa = eIO(seg(t, 8.5, 11.5));
     cm.x = lerp(hs.x, CX, pa); cm.y = lerp(hs.y, CY + 34, pa);
@@ -1157,7 +1169,7 @@ function render(t) {
   var fx2 = vx >= W ? W / 2 : clamp(cm.x, vx / 2, W - vx / 2);
   var fy2 = vy >= H ? H / 2 : clamp(cm.y, vy / 2, H - vy / 2);
   ctx.save();
-  ctx.translate(cw / 2 - fx2 * s, ch / 2 - fy2 * s);
+  ctx.translate(cw / 2 - fx2 * s, ch / 2 - fy2 * s - LIFT);
   ctx.scale(s, s);
   CUR = cellsAt(t);
   for (var i = 0; i < BGC.length; i++) drawBgCell(BGC[i], t);
