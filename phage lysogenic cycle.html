@@ -1048,13 +1048,25 @@ var ANN = [
 function drawAnno(t) {
   var k = 1 / CAMZ;                       /* undo the camera zoom for text */
   ctx.save();
-  ctx.font = '500 ' + (12 * k).toFixed(2) + 'px "IBM Plex Mono", monospace';
+  ctx.font = '500 ' + (12 * k).toFixed(2) + 'px "IBM Plex Mono", monospace";
+  var port = ch > cw && CAM_S > 0;
+  var LIFT = (port || (cw > ch && ch <= 500)) ? (port ? ch * .05 : ch * .08) : 0;
   for (var i = 0; i < ANN.length; i++) {
     var A = ANN[i];
     var al = seg(t, A.a, A.a + .5) * (1 - seg(t, A.b - .5, A.b));
     if (al <= 0) continue;
     var r = A.fn(t);
     var lx = r.pt.x + r.o.x * k, ly = r.pt.y + r.o.y * k;
+    if (port) {
+      /* clamp labels to safe screen area in portrait */
+      var tw = ctx.measureText(r.txt).width;
+      var sx = (lx - CAM_FX) * CAM_S + cw / 2;
+      var sy = (ly - CAM_FY) * CAM_S + ch / 2 - LIFT;
+      sx = r.o.side ? clamp(sx, 16 + tw, cw - 10) : clamp(sx, 10, cw - 16 - tw);
+      sy = clamp(sy, ch * .16 + 8, ch * .72 - 8);
+      lx = CAM_FX + (sx - cw / 2) / CAM_S;
+      ly = CAM_FY + (sy - ch / 2 + LIFT) / CAM_S;
+    }
     ctx.globalAlpha = al;
     ctx.strokeStyle = 'rgba(160,240,220,.55)'; ctx.lineWidth = k;
     ctx.beginPath(); ctx.moveTo(r.pt.x, r.pt.y); ctx.lineTo(lx, ly); ctx.stroke();
@@ -1070,7 +1082,7 @@ function drawAnno(t) {
   ctx.restore();
 }
 /* ================= environment ================= */
-var cw = 0, ch = 0, dpr = 1, CAM_S = 0;
+var cw = 0, ch = 0, dpr = 1, CAM_S = 0, CAM_FX = 0, CAM_FY = 0;
 function resize() {
   dpr = Math.min(2, window.devicePixelRatio || 1);
   cw = window.innerWidth; ch = window.innerHeight;
@@ -1156,7 +1168,7 @@ function render(t) {
   ctx.lineJoin = 'round';
   drawBG(t);
   var cm = cam(t), port = ch > cw;
-  var LIFT = (port || (cw > ch && ch <= 500)) ? ch * .05 : 0; /* phones: raise the action above the caption zone */
+  var LIFT = (port || (cw > ch && ch <= 500)) ? (port ? ch * .05 : ch * .08) : 0; /* phones: raise the action above the caption zone */
   if (port && t < 12) { /* keep the incoming phage in frame during adsorption */
     var hs = heroState(t), pa = eIO(seg(t, 8.5, 11.5));
     cm.x = lerp(hs.x, CX, pa); cm.y = lerp(hs.y, CY + 34, pa);
@@ -1168,6 +1180,7 @@ function render(t) {
   var vx = cw / s, vy = ch / s;
   var fx2 = vx >= W ? W / 2 : clamp(cm.x, vx / 2, W - vx / 2);
   var fy2 = vy >= H ? H / 2 : clamp(cm.y, vy / 2, H - vy / 2);
+  CAM_FX = fx2; CAM_FY = fy2;
   ctx.save();
   ctx.translate(cw / 2 - fx2 * s, ch / 2 - fy2 * s - LIFT);
   ctx.scale(s, s);
@@ -1326,6 +1339,8 @@ function fmt(x) {
 }
 function setPlaying(v) { playing = v; }
 function seekTo(v) { t = clamp(v, 0, T); render(t); ui(t); }
+try { window.setPlaying = setPlaying; window.seekTo = seekTo; } catch(e) {}
+try { window.setPlaying = setPlaying; window.seekTo = seekTo; } catch(e) {}
 function togglePlay() { if (t >= T - .01) t = 0; setPlaying(!playing); }
 for (var si = 0; si < PH.length; si++) {
   (function (idx) {
