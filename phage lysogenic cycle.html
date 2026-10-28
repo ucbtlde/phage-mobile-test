@@ -1061,11 +1061,11 @@ function drawAnno(t) {
       /* clamp labels to safe screen area in portrait */
       var tw = ctx.measureText(r.txt).width;
       var sx = (lx - CAM_FX) * CAM_S + cw / 2;
-      var sy = (ly - CAM_FY) * CAM_S + ch / 2 - LIFT;
+      var sy = (ly - CAM_FY) * CAM_S + ch / 2 - LIFTa;
       sx = r.o.side ? clamp(sx, 16 + tw, cw - 10) : clamp(sx, 10, cw - 16 - tw);
       sy = clamp(sy, ch * .16 + 8, ch * .72 - 8);
       lx = CAM_FX + (sx - cw / 2) / CAM_S;
-      ly = CAM_FY + (sy - ch / 2 + LIFT) / CAM_S;
+      ly = CAM_FY + (sy - ch / 2 + LIFTa) / CAM_S;
     }
     ctx.globalAlpha = al;
     ctx.strokeStyle = 'rgba(160,240,220,.55)'; ctx.lineWidth = k;
