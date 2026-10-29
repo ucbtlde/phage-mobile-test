@@ -1048,7 +1048,7 @@ var ANN = [
 function drawAnno(t) {
   var k = 1 / CAMZ;                       /* undo the camera zoom for text */
   ctx.save();
-  ctx.font = '500 ' + (12 * k).toFixed(2) + 'px "IBM Plex Mono", monospace";
+  ctx.font = '500 ' + (12 * k).toFixed(2) + 'px "IBM Plex Mono", monospace';
   var port = ch > cw && CAM_S > 0;
   var LIFT = (port || (cw > ch && ch <= 500)) ? (port ? ch * .05 : ch * .08) : 0;
   for (var i = 0; i < ANN.length; i++) {
