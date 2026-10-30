@@ -1050,7 +1050,7 @@ function drawAnno(t) {
   ctx.save();
   ctx.font = '500 ' + (12 * k).toFixed(2) + 'px "IBM Plex Mono", monospace';
   var port = ch > cw && CAM_S > 0;
-  var LIFT = (port || (cw > ch && ch <= 500)) ? (port ? ch * .05 : ch * .08) : 0;
+  var LIFTa = (port || (cw > ch && ch <= 500)) ? (port ? ch * .05 : ch * .08) : 0;
   for (var i = 0; i < ANN.length; i++) {
     var A = ANN[i];
     var al = seg(t, A.a, A.a + .5) * (1 - seg(t, A.b - .5, A.b));
